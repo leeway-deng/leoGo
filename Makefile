@@ -10,6 +10,7 @@ BUILD_VERSION=$(tag)
 BUILD_TIME=`date +%FT%T%z`
 LDFLAGS=-ldflags "-X main.BuildVersion=${BUILD_VERSION} -X main.BuildTime=${BUILD_TIME}"
 DIST_PATH=${GOPATH}/dist/leoGo-${BUILD_ARCH}-${BUILD_VERSION}
+STATIC_PATH=/data/leoGo/static
 
 dep:
 #	env GIT_TERMINAL_PROMPT=1 go get --insecure github.com/henrylee2cn/faygo
@@ -20,7 +21,9 @@ release: build
 #	cp ${GOPATH}/bin/* ${DIST_PATH}
 	rm -Rf ${DIST_PATH}／config
 	mkdir -p ${DIST_PATH}/config
-	cp ${GOPATH}/config/* ${DIST_PATH}/config
+	cp -R ${GOPATH}/config/* ${DIST_PATH}/config
+	mkdir -p ${STATIC_PATH}
+	cp -R ${GOPATH}/static/* ${STATIC_PATH}
 
 .PHONY: all clean install mac windows linux
 all: install
