@@ -13,5 +13,5 @@ make
 
 ### 测试
 ~~~
-curl -H "deviceId:tangbinbin" -H "topic:/aaa/bbb" -d "testtset" "http://127.0.0.1:8000/test"
+curl -H "author:leeway.deng" -H "company:io-ok.com" -d "test" "http://47.94.210.163/apidoc/#//"
 ~~~
