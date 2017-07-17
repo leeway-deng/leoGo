@@ -1,5 +1,6 @@
 ## leoGo
-## faygo user manual refer: https://github.com/henrylee2cn/faydoc
+## [FW-API] faygo refer: https://github.com/henrylee2cn/faydoc
+## [FW-UI] AdminLTE refer: https://github.com/hason/AdminLTE
  
 ### 编译
 ~~~
