@@ -3,6 +3,7 @@ package demo
 import (
 	"github.com/henrylee2cn/faygo"
 	// "time"
+	"module/demo/dao/zhijin"
 )
 
 type Render struct {
@@ -30,5 +31,22 @@ func Index() faygo.HandlerFunc {
 			"CONTENT": "Welcome To io-ok",
 			"AUTHOR":  "Leeway.Deng",
 		})
+	}
+}
+
+func Report() faygo.HandlerFunc {
+	return func(ctx *faygo.Context) error {
+		result := make(faygo.Map)
+		result["code"] = 10000
+		result["msg"] = "OK"
+		reports, err := zhijin.GetDataBySqlId("mssql/zhijin","select_tbProvince", "")
+		if err != nil {
+			faygo.Error(err.Error())
+			result["code"] = 10001
+			result["msg"] = "error in inner system"
+		} else {
+			result["data"] = reports
+		}
+		return ctx.JSON(200, result, true)
 	}
 }

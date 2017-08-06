@@ -198,7 +198,7 @@ func (ms *TModels) loadTModels() {
 
 }
 
-//将带路径文件名处理成 TModel的 id 示例： bizmodel\demo.msql  --> biz/demo
+//将带路径文件名处理成 TModel的 id 示例： bizmodel\zhijin.msql  --> biz/demo
 func (ms *TModels) filenameToModelId(path string) string {
 	key := strings.Replace(path, "\\", "/", -1)
 	key = strings.TrimSuffix(key, ms.extension) //去掉扩展名
