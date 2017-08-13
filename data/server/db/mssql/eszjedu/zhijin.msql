@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<model id="zhijin" database="eszjedu">
+	<comment>
+		<desc>DirectSQL-知金教育demo</desc>
+		<author>liwei.deng</author>
+		<date>2017-08-04</date>
+		<history Editor="liwei.deng" Date="2017-08-04">创建</history>
+	</comment>
+	<sql type="select" id="select_tbProvince" desc="查询tbProvince">
+		<cmd in="" out="">
+			<![CDATA[ select * from tbProvince limit 1 ]]>
+		</cmd>
+	</sql>
+	<!-- 下面可继续添加新的方法 -->
+</model>

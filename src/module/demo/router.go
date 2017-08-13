@@ -15,7 +15,7 @@ func Route(frame *faygo.Framework) {
 		frame.NewGroup("home",
 			frame.NewNamedGET("html", "render", &Render{}),
 		),
-		frame.NewNamedAPI("zhijin", "GET", "/zhijin/report", Report()),
+		frame.NewNamedAPI("zhijin", "GET", "api/zhijin/report", Report()),
 		//frame.NewStatic("/sf", faygo.JoinStatic("")),
 	).Use(tgMiddleware.CrossOrigin)
 }

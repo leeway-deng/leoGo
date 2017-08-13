@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<model id="leotao" database="leotao">
+	<comment>
+		<desc>DirectSQL-leotao</desc>
+		<author>liwei.deng</author>
+		<date>2017-08-13</date>
+		<history Editor="liwei.deng" Date="2017-08-13">创建</history>
+	</comment>
+	<sql type="select" id="select_tbUser" desc="查询tbUser">
+		<cmd in="" out="">
+			<![CDATA[ select * from user limit 1 ]]>
+		</cmd>
+	</sql>
+	<!-- 下面可继续添加新的方法 -->
+</model>

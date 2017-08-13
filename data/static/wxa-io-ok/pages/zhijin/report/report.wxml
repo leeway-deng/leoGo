@@ -1,0 +1,4 @@
+<import src="../../widgets/list/list.wxml"/>
+<template is="list" data="{{cells: cells}}"/>
+<import src="../../widgets/message/message.wxml"/>
+<template is="message" data="{{message: message}}"/>

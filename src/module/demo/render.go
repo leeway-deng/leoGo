@@ -39,7 +39,8 @@ func Report() faygo.HandlerFunc {
 		result := make(faygo.Map)
 		result["code"] = 10000
 		result["msg"] = "OK"
-		reports, err := zhijin.GetDataBySqlId("mssql/zhijin","select_tbProvince", "")
+		//reports, err := zhijin.GetDataBySqlId("mssql/zhijin","select_tbProvince", "")
+		reports, err := zhijin.GetDataBySqlId("mysql/leotao","select_tbUser", "")
 		if err != nil {
 			faygo.Error(err.Error())
 			result["code"] = 10001
