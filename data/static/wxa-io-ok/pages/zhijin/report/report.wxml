@@ -1,4 +1,4 @@
 <import src="../../../widgets/list/list.wxml"/>
-<template is="list" data="{{cells: cells, showLoading: showLoading}}"/>
+<template is="list" data="{{cells: cells, hasMore: hasMore, showLoading: showLoading}}"/>
 <import src="../../../widgets/message/message.wxml"/>
 <template is="message" data="{{message: message}}"/>

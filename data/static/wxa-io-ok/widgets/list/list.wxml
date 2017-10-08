@@ -13,5 +13,11 @@
             </block>
         </view>
     </block>
+    <block wx:if="{{hasMore}}">
+        <view class="loading-tip">拼命加载中…</view>
+    </block>
+    <block wx:else>
+        <view class="loading-tip">没有更多内容了</view>
+    </block>
  </block>
 </template>

@@ -1,2 +1,2 @@
-@import '../../../widgets/list/list.wxss';
+@import "../../../widgets/list/list.wxss";
 @import "../../../widgets/message/message.wxss";

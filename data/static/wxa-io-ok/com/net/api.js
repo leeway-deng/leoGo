@@ -9,6 +9,7 @@ var message = require('../../widgets/message/message')
 function getCommList(url, start, count, cb, fail_cb) {
     var that = this
     message.hide.call(that)
+    for(var t = Date.now();Date.now() - t <= 5000;);
     if (that.data.hasMore) {
         wx.request({
             url: url,
