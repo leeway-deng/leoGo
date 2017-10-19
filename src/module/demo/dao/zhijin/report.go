@@ -22,7 +22,7 @@ func GetDataBySqlId4Map(modelId, sqlId string, params faygo.Map) ([]map[string]i
 /**
 单个查询 参数 map[string]interface{} 返回 []map[string]interface{}
 tpl
-   {% for o in GetDataBySqlId("biz/zhijin","select_tbProvince","{`para`:`sql参数值`}") %}
+   {% for o in GetDataBySqlId("mysql/leotao","select_tbUser","{`para`:`sql参数值`}") %}
        <p>名称:{{ o.cnname }}</p>
    {% endfor %}
  */
