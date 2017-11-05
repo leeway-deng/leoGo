@@ -8,53 +8,57 @@ import (
 )
 
 var (
-	redisPool    *redis.Pool
-	redisPoolMu  sync.Mutex
+	redisPool      *redis.Pool
+	redisPoolMutex sync.Mutex
+	once           sync.Once
 )
 
 type RedisPoolConfig struct {
-	host string
-	port  int
-	password string
-	maxIdle int
-	maxActive int
-	idleTimeout time.Duration
-	readTimeout time.Duration
-	writeTimeout time.Duration
-	isTestOnBorrow bool
+	Host           *string
+	Port           *int
+	Password       *string
+	MaxIdle        int
+	MaxActive      int
+	IdleTimeout    time.Duration
+	ReadTimeout    time.Duration
+	WriteTimeout   time.Duration
+	IsTestOnBorrow bool
 }
 
-func NewPool(poolConfig RedisPoolConfig, args ...string) (*redis.Pool, error) {
-	if (redisPool == nil) {
-		redisPool = &redis.Pool {
+func CreatePool(poolConfig RedisPoolConfig, args ...string) (*redis.Pool, error) {
+	//if (redisPool == nil) { // Singleton way1
+	//	redisPoolMutex.Lock()
+	//	defer redisPoolMutex.Unlock()
+	once.Do(func() { // Singleton way2
+		redisPool = &redis.Pool{
 			// Other pool configuration not shown in this example.
 			Dial: func() (redis.Conn, error) {
 				var addr string
-				if (poolConfig.port > 0) {
-					addr = fmt.Sprintf("%s:%d", poolConfig.host, poolConfig.port)
+				if (*poolConfig.Port > 0) {
+					addr = fmt.Sprintf("%s:%d", *poolConfig.Host, *poolConfig.Port)
 				} else {
-					addr = poolConfig.host
+					addr = fmt.Sprintf("%s", *poolConfig.Host)
 				}
 				c, err := redis.Dial("tcp", addr,
-					redis.DialReadTimeout(poolConfig.readTimeout),
-					redis.DialWriteTimeout(poolConfig.writeTimeout))
+					redis.DialReadTimeout(poolConfig.ReadTimeout),
+					redis.DialWriteTimeout(poolConfig.WriteTimeout))
 				if err != nil {
 					return nil, err
 				}
-				if (poolConfig.password != "") {
-					if _, err := c.Do("AUTH", poolConfig.password); err != nil {
+				if (poolConfig.Password != nil) {
+					if _, err := c.Do("AUTH", fmt.Sprintf("%s", *poolConfig.Password)); err != nil {
 						c.Close()
 						return nil, err
 					}
 				}
 				return c, nil
 			},
-			MaxIdle: poolConfig.maxIdle,
-			MaxActive: poolConfig.maxActive,
-			IdleTimeout: poolConfig.idleTimeout,
+			MaxIdle:     poolConfig.MaxIdle,
+			MaxActive:   poolConfig.MaxActive,
+			IdleTimeout: poolConfig.IdleTimeout,
 		}
 
-		if (poolConfig.isTestOnBorrow) {
+		if (poolConfig.IsTestOnBorrow) {
 			redisPool.TestOnBorrow = func(c redis.Conn, t time.Time) error {
 				if time.Since(t) < time.Minute {
 					return nil
@@ -63,7 +67,7 @@ func NewPool(poolConfig RedisPoolConfig, args ...string) (*redis.Pool, error) {
 				return err
 			}
 		}
-	}
+	})
 
 	return redisPool, nil
 }

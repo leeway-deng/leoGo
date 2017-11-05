@@ -2,88 +2,147 @@ package test
 
 import (
 	"flag"
-	"errors"
 	"fmt"
 	"testing"
 	"os"
 	"io/ioutil"
 	"sync"
-	"github.com/garyburd/redigo/redis"
-	"os/exec"
-	"strconv"
+	"reflect"
+	"common/cache/redis"
 	"time"
 )
 
-var (
-	redisHost     = flag.String("redis-host", "redis-host", "Path to redis server binary")
-	redisPort = flag.Int("redis-port", 16379, "Beginning of port range for test servers")
-	redisLogName  = flag.String("redis-log", "", "Write Redis server logs to `filename`")
-	redisLog      = ioutil.Discard //the io.writer without return
+/*
+测试所有的文件 go test，将对当前目录下的所有*_test.go文件进行编译并自动运行测试。
+测试某个文件使用”-file”参数。go test –file *.go 。例如：go test -file mysql_test.go，"-file"参数不是必须的，可以省略，如果你输入go test b_test.go也会得到一样的效果。
+测试某个方法 go test -run='Test_xxx'
+"-v" 参数 go test -v ... 表示无论用例是否测试通过都会显示结果，不加"-v"表示只显示未通过的用例结果
+进行所有go文件的benchmark测试 go test -bench=".*" 或 go test . -bench=".*"
+对某个go文件进行benchmark测试 go test mysql_b_test.go -bench=".*"
+ */
 
-	redisPoolMu  sync.Mutex
-	redisPool    *redis.Pool
-	defaultErr error
+var (
+	redisHost    = flag.String("host", "redis-host", "Path to redis server binary")
+	redisPort    = flag.Int("port", 16379, "Beginning of port range for test servers")
+	redisLogName = flag.String("log", "", "Write Redis server logs to `filename`")
+	redisLog     = ioutil.Discard //the io.writer without return
+
+	redisPoolMutex  sync.Mutex
+	redisPoolConfig = &redis.RedisPoolConfig{
+		Host: redisHost,
+		Port: redisPort,
+		Password: nil,
+		MaxIdle: 3,
+		MaxActive: 10,
+		IdleTimeout: 240 * time.Second,
+		ReadTimeout: 1 * time.Second,
+		WriteTimeout: 1 * time.Second,
+		IsTestOnBorrow: true,
+	}
+	redisPool, err = redis.CreatePool(*redisPoolConfig)
+
+	testCommands = []struct {
+		args     []interface{}
+		expected interface{}
+	}{
+		{
+			[]interface{}{"PING"},
+			"PONG",
+		},
+		{
+			[]interface{}{"SET", "foo", "bar"},
+			"OK",
+		},
+		{
+			[]interface{}{"GET", "foo"},
+			[]byte("bar"),
+		},
+		{
+			[]interface{}{"GET", "nokey"},
+			nil,
+		},
+		{
+			[]interface{}{"MGET", "nokey", "foo"},
+			[]interface{}{nil, []byte("bar")},
+		},
+		{
+			[]interface{}{"INCR", "mycounter"},
+			int64(1),
+		},
+		{
+			[]interface{}{"LPUSH", "mylist", "foo"},
+			int64(1),
+		},
+		{
+			[]interface{}{"LPUSH", "mylist", "bar"},
+			int64(2),
+		},
+		{
+			[]interface{}{"LRANGE", "mylist", 0, -1},
+			[]interface{}{[]byte("bar"), []byte("foo")},
+		},
+		{
+			[]interface{}{"MULTI"},
+			"OK",
+		},
+		{
+			[]interface{}{"LRANGE", "mylist", 0, -1},
+			"QUEUED",
+		},
+		{
+			[]interface{}{"PING"},
+			"QUEUED",
+		},
+		{
+			[]interface{}{"EXEC"},
+			[]interface{}{
+				[]interface{}{[]byte("bar"), []byte("foo")},
+				"PONG",
+			},
+		},
+	}
 )
 
-// DialDefaultServer starts the test server if not already started and dials a
-// connection to the server.
-func DialDefaultServer() (redis.Conn, error) {
-	if err := startDefaultServer(); err != nil {
-		return nil, err
+func TestDoCommands(t *testing.T) {
+	c := redisPool.Get()
+	defer c.Close()
+
+	for _, cmd := range testCommands {
+		actual, err := c.Do(cmd.args[0].(string), cmd.args[1:]...)
+		if err != nil {
+			t.Errorf("Do(%v) returned error %v", cmd.args, err)
+			continue
+		}
+		if !reflect.DeepEqual(actual, cmd.expected) {
+			t.Errorf("Do(%v) = %v, want %v", cmd.args, actual, cmd.expected)
+		}
 	}
-	c, err := redis.Dial("tcp", fmt.Sprintf(":%d", *serverBasePort),
-		redis.DialReadTimeout(1*time.Second),
-		redis.DialWriteTimeout(1*time.Second))
-	if err != nil {
-		return nil, err
-	}
-	c.Do("FLUSHDB")
-	return c, nil
 }
 
 func TestMain(m *testing.M) {
 	os.Exit(func() int {
 		flag.Parse()
-
+		fmt.Printf("redisHost=%s", *redisHost)
 		var f *os.File
-		if *serverLogName != "" {
+		if *redisLogName != "" {
 			var err error
-			f, err = os.OpenFile(*serverLogName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
+			f, err = os.OpenFile(*redisLogName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error opening redis-log: %v\n", err)
 				return 1
 			}
 			defer f.Close()
-			serverLog = f
+			redisLog = f
 		}
 
-		defer stopDefaultServer()
+		defer destroy()
 
 		return m.Run()
 	}())
 }
 
-// startDefaultServer starts the default server if not already running.
-func startDefaultServer() error {
-	defaultServerMu.Lock()
-	defer defaultServerMu.Unlock()
-	if defaultServer != nil || defaultServerErr != nil {
-		return defaultServerErr
-	}
-	defaultServer, defaultServerErr = NewServer(
-		"default",
-		"--port", strconv.Itoa(*serverBasePort),
-		"--save", "",
-		"--appendonly", "no")
-	return defaultServerErr
-}
-
-// stopDefaultServer stops the server created by DialDefaultServer.
-func stopDefaultServer() {
-	defaultServerMu.Lock()
-	defer defaultServerMu.Unlock()
-	if defaultServer != nil {
-		defaultServer.Stop()
-		defaultServer = nil
+func destroy() {
+	if (nil != redisPool) {
+		redisPool.Close()
 	}
 }
