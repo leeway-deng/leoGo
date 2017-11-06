@@ -115,10 +115,13 @@ func TestDoCommands(t *testing.T) {
 		}
 		if !reflect.DeepEqual(actual, cmd.expected) {
 			t.Errorf("Do(%v) = %v, want %v", cmd.args, actual, cmd.expected)
+		} else {
+			t.Logf("Do(%v) = %v", cmd.args, actual)
 		}
 	}
 }
 
+//go test redis_test.go -host "127.0.0.1" -port "36379" -log "/Users/apple/Projects/go/leoGo/src/test/redis.log"
 func TestMain(m *testing.M) {
 	os.Exit(func() int {
 		flag.Parse()
