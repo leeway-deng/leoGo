@@ -15,7 +15,7 @@ func GetDataBySqlId4Map(modelId, sqlId string, params faygo.Map) ([]map[string]i
 		faygo.Error(err.Error())
 		return nil, err
 	}
-	faygo.Debug("GetDataBySqlId4Map result:", result)
+	faygo.Debug("[GetDataBySqlId4Map] result:", result)
 	return result, nil
 }
 
@@ -25,7 +25,7 @@ tpl
    {% for o in GetDataBySqlId("mysql/leotao","select_tbUser","{`para`:`sql参数值`}") %}
        <p>名称:{{ o.cnname }}</p>
    {% endfor %}
- */
+*/
 func GetDataBySqlId(modelId, sqlId string, params string) ([]map[string]interface{}, error) {
 	//参数处理
 	para := make(faygo.Map)
@@ -35,6 +35,6 @@ func GetDataBySqlId(modelId, sqlId string, params string) ([]map[string]interfac
 			return nil, err
 		}
 	}
-	faygo.Debug("GetDataBySqlId params:", para)
+	faygo.Debug("[GetDataBySqlId] params:", para)
 	return GetDataBySqlId4Map(modelId, sqlId, para)
 }

@@ -15,14 +15,14 @@ func main() {
 	go pprofServer()
 
 	faygo.SetShutdown(time.Minute, func() error {
-		faygo.Debug("Before services close: wait 1s...")
+		faygo.Debug("[Main]Before services close: wait 1s...")
 		time.Sleep(1 * time.Second)
-		faygo.Debug("Before services close: 1s end!")
+		faygo.Debug("[Main]Before services close: 1s end!")
 		return nil
 	}, func() error {
-		faygo.Debug("After services are closed: wait 2s...")
+		faygo.Debug("[Main]After services are closed: wait 2s...")
 		time.Sleep(2 * time.Second)
-		faygo.Debug("After services are closed: 2s end!")
+		faygo.Debug("[Main]After services are closed: 2s end!")
 		return nil
 	})
 

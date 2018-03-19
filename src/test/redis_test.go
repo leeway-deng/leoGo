@@ -3,12 +3,12 @@ package test
 import (
 	"flag"
 	"fmt"
-	"testing"
-	"os"
 	"io/ioutil"
-	"sync"
+	"lib/cache/redis"
+	"os"
 	"reflect"
-	"common/cache/redis"
+	"sync"
+	"testing"
 	"time"
 )
 
@@ -19,7 +19,7 @@ import (
 "-v" 参数 go test -v ... 表示无论用例是否测试通过都会显示结果，不加"-v"表示只显示未通过的用例结果
 进行所有go文件的benchmark测试 go test -bench=".*" 或 go test . -bench=".*"
 对某个go文件进行benchmark测试 go test mysql_b_test.go -bench=".*"
- */
+*/
 
 var (
 	redisHost    = flag.String("host", "redis-host", "Path to redis server binary")
@@ -29,14 +29,14 @@ var (
 
 	redisPoolMutex  sync.Mutex
 	redisPoolConfig = &redis.RedisPoolConfig{
-		Host: redisHost,
-		Port: redisPort,
-		Password: nil,
-		MaxIdle: 3,
-		MaxActive: 10,
-		IdleTimeout: 240 * time.Second,
-		ReadTimeout: 1 * time.Second,
-		WriteTimeout: 1 * time.Second,
+		Host:           redisHost,
+		Port:           redisPort,
+		Password:       nil,
+		MaxIdle:        3,
+		MaxActive:      10,
+		IdleTimeout:    240 * time.Second,
+		ReadTimeout:    1 * time.Second,
+		WriteTimeout:   1 * time.Second,
 		IsTestOnBorrow: true,
 	}
 	redisPool, err = redis.CreatePool(*redisPoolConfig)
@@ -145,7 +145,7 @@ func TestMain(m *testing.M) {
 }
 
 func destroy() {
-	if (nil != redisPool) {
+	if nil != redisPool {
 		redisPool.Close()
 	}
 }
