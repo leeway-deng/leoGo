@@ -8,7 +8,7 @@ BUILD_ARCH=$(arch)
 #BUILD_VERSION=`git describe --tags`
 BUILD_VERSION=$(tag)
 BUILD_TIME=`date +%FT%T%z`
-LDFLAGS=-n -ldflags "-X main.BuildVersion=${BUILD_VERSION} -X main.BuildTime=${BUILD_TIME}"
+LDFLAGS=-ldflags "-X main.BuildVersion=${BUILD_VERSION} -X main.BuildTime=${BUILD_TIME}"
 DIST_PATH=${GOPATH}/dist/leoGo-${BUILD_ARCH}-${BUILD_VERSION}
 STATIC_PATH=/data/leoGo/static
 
@@ -23,7 +23,7 @@ release: build
 	mkdir -p ${DIST_PATH}/config
 	cp -R ${GOPATH}/config/* ${DIST_PATH}/config
 	mkdir -p ${STATIC_PATH}
-	cp -R ${GOPATH}/static/* ${STATIC_PATH}
+	cp -R ${GOPATH}/data/static/* ${STATIC_PATH}
 
 .PHONY: all clean install mac windows linux
 all: install
