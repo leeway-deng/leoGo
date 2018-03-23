@@ -4,7 +4,7 @@
 # docker pull daocloud.io/library/golang:1.8;docker images
 # docker rmi -f leo-leogo;docker build -t leo-leogo .
 
-#Base image
+# Set the base image
 FROM daocloud.io/library/golang:1.8
 
 MAINTAINER dengliwei dengliwei@le.com
@@ -13,13 +13,15 @@ MAINTAINER dengliwei dengliwei@le.com
 EXPOSE 8081
 
 RUN mkdir -p /app/go/leoGo/config
+# create the dir linking with external volume
 RUN mkdir -p /data/leoGo
 
 COPY dist/leoGo-amd64-1.0.0/leoGo /app/go/leoGo
 COPY config /app/go/leoGo/config
 
 WORKDIR /app/go
-VOLUME /data/leoGo
+# Declare the internal and external volume
+VOLUME ["/app/go", "/data/leoGo"]
 
 #ENTRYPOINT /app/go/leoGo/leoGo
 #RUN ["chmod", "+x", "/app/go/leoGo/leoGo"]
